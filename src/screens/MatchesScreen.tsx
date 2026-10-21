@@ -13,6 +13,8 @@ import {
 import { MATCHES_URL } from '../config';
 import { Match } from '../types';
 import { UpdatedAgo } from '../components/UpdatedAgo';
+import { FavoriteButton } from '../components/FavoriteButton';
+import { useFavorites } from '../hooks/useFavorites';
 import { extractMatches, formatDate, scoreParts, teamName } from '../utils/matches';
 
 type Filter = 'all' | 'upcoming' | 'finished';
@@ -122,6 +124,8 @@ export function MatchesScreen() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const { isFavorite, toggle } = useFavorites();
 
   const load = useCallback(async (isRefresh = false) => {
     try {
@@ -292,9 +296,16 @@ export function MatchesScreen() {
                                   {STATUS_LABEL[item.status] ?? item.status}
                                 </Text>
                               </View>
-                              <Text style={styles.dateText}>
-                                {formatDate(item.startsAt)}
-                              </Text>
+
+                              <View style={styles.cardHeaderRight}>
+                                <Text style={styles.dateText}>
+                                  {formatDate(item.startsAt)}
+                                </Text>
+                                <FavoriteButton
+                                    active={isFavorite(item.id)}
+                                    onPress={() => toggle(item.id)}
+                                />
+                              </View>
                             </View>
 
                             <View style={styles.teamsBlock}>
@@ -442,6 +453,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
+  },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
 
   statusBadge: {

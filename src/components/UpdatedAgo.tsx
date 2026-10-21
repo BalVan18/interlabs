@@ -1,27 +1,34 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
-type Props = {
-  // Момент последней успешной загрузки данных.
+interface Props {
   since: Date;
-};
+}
 
-// Подпись «Обновлено N сек назад».
+function formatAgo(sec: number): string {
+  if (sec < 5) return 'Только что обновлено';
+  if (sec < 60) return `Обновлено ${sec} сек назад`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `Обновлено ${min} мин назад`;
+  const h = Math.floor(min / 60);
+  return `Обновлено ${h} ч назад`;
+}
+
 export function UpdatedAgo({ since }: Props) {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
-    setInterval(() => {
-      setSeconds(seconds + 1);
-    }, 1000);
-  }, []);
+    setSeconds(0);
+    const timer = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [since]);
 
-  return <Text style={styles.text}>Обновлено {seconds} сек назад</Text>;
+  return <Text style={styles.text}>{formatAgo(seconds)}</Text>;
 }
 
 const styles = StyleSheet.create({
   text: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#64748B',
   },
 });
